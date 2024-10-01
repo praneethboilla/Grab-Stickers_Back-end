@@ -47,6 +47,3 @@ app.use((error, req, res, next) => {
 });
 
 module.exports = app;
-
-
-// mongodb+srv://boillapraneeth10:ir5V00HRXJQCbGXs@node-rest-shop.i8yle.mongodb.net/?retryWrites=true&w=majority&appName=node-rest-shop
