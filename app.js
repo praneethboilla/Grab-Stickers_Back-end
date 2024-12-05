@@ -8,6 +8,7 @@ const cors = require('cors');
 const productsRoutes = require('./api/routes/products');
 const ordersRoutes = require('./api/routes/orders');
 const userRoutes = require('./api/routes/user');
+const cartRoutes = require('./api/routes/cart')
 
 mongoose.connect('mongodb+srv://boillapraneeth10:' + process.env.MONGO_ATLAS_PW + '@node-rest-shop.i8yle.mongodb.net/?retryWrites=true&w=majority&appName=node-rest-shop',
     { ssl: true }
@@ -37,6 +38,7 @@ app.use((req, res, next) => {
 app.use('/products', productsRoutes);
 app.use('/orders', ordersRoutes);
 app.use('/user', userRoutes);
+app.use('/cart', cartRoutes);
 
 app.use((req, res, next) => {
     const error = new Error('Not found');
