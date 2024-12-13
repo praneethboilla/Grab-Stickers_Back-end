@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
+require('dotenv').config();
 
 const productsRoutes = require('./api/routes/products');
 const ordersRoutes = require('./api/routes/orders');
