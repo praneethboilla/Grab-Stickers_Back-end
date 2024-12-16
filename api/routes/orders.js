@@ -3,9 +3,10 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const Order = require('../models/order');
 const Product = require('../models/product');
+const auth = require('../middleware/authenticate');
 
-router.get('/', (req, res, next) => {
-    Order.find()
+router.get('/', auth ,(req, res, next) => {
+    Order.find({user: req.userData.userId})
         .populate('products.product')
         .then(docs => {
             res.status(200).json({
@@ -32,7 +33,7 @@ router.get('/', (req, res, next) => {
         });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', auth ,(req, res, next) => {
     const orderItems = req.body.products; 
     const productPromises = orderItems.map(item => 
         Product.findById(item.productId)
@@ -52,6 +53,7 @@ router.post('/', (req, res, next) => {
             // If all products are valid, create the order
             const order = new Order({
                 _id: new mongoose.Types.ObjectId(),
+                user: req.userData.userId,
                 products: validItems
             });
 
@@ -71,7 +73,6 @@ router.post('/', (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log(err);
             res.status(500).json({
                 error: err
             });
@@ -79,8 +80,8 @@ router.post('/', (req, res, next) => {
 });
 
 
-router.get('/:orderId', (req, res, next) => {
-    Order.findById(req.params.orderId)
+router.get('/:orderId', auth ,(req, res, next) => {
+    Order.findOne({ _id: req.params.orderId, user: req.userData.userId })
     .populate('products.product')
     .then(order => {
         if (!order) {
@@ -97,15 +98,18 @@ router.get('/:orderId', (req, res, next) => {
         });
     })
     .catch(err => {
-        console.log(err);
         res.status(500).json({error: err});
     });
 });
 
-router.delete('/:orderId', (req, res, next) => {
-    Order.findByIdAndDelete(req.params.orderId)
+router.delete('/:orderId', auth ,(req, res, next) => {
+    Order.findOneAndDelete({ _id: req.params.orderId, user: req.userData.userId })
     .then(result => {
-        console.log("Delete Order result", result);
+        if (!result) {
+            return res.status(404).json({
+                message: "Order not found or you don't have permission to delete it"
+            });
+        }
         res.status(200).json({
             message: 'Order deleted',
             request: {
@@ -116,7 +120,6 @@ router.delete('/:orderId', (req, res, next) => {
         });
     })
     .catch(err => {
-        console.log(err);
         res.status(500).json({error: err});
     })
 });
