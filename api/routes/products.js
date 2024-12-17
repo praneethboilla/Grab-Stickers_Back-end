@@ -24,8 +24,34 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({storage: storage, limits:{fileSize:1024 * 1024 * 5}, fileFilter:fileFilter});
-////
-router.get('/', (req, res, next) => {
+
+router.get('/', async(req, res) => {
+    try {
+        const {category, limit=6} = req.query;
+        if(category){
+            const products = await Product.find({category});
+            return res.json(products)
+        }
+
+        // fetch 10 products from each products
+        const categories = await Product.distinct('category');
+        const productByCategory = {};
+
+        for(const cat of categories){
+            const products = await Product.find({category: cat}).limit(parseInt(limit));
+            productByCategory[cat] = products;
+        }
+        res.json(productByCategory);
+    }
+    catch (error){
+        console.error("backend",error);
+        res.status(500).json({
+            message:"Server Error in products"
+        });
+    }
+});
+
+router.get('/random', (req, res, next) => {
     Product.find()
     .select('name price _id productImage category description')
     .then(docs => {
